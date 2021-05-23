@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    {% if app.user %}
+        <p>Username: {{ app.user.username }}</p>
+        <p>Keyckloak ID: {{ app.user.keycloakId }}</p>
+        <a href="http://127.0.0.1:8080/auth/realms/test_realm/account/">Account</a> |
+        <a href="{{ path('lightsaml_sp.logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ path('lightsaml_sp.login') }}">Login</a>
+    {% endif %}
+{% endblock %}

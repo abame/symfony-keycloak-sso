@@ -1,0 +1,66 @@
+version: '3.7'
+services:
+    mysql:
+        image: mysql:5.7
+        cap_add:
+            - SYS_NICE  # CAP
+        command: ["--default-authentication-plugin=mysql_native_password"]
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: symfony
+        volumes:
+            - data:/var/lib/mysql
+        networks:
+            - mysql
+    php:
+        build: ./php
+        ports:
+            - "9000:9000"
+        volumes:
+            - .:/var/www/html
+            - ./var/log:/var/www/html/var/log
+        depends_on:
+            - mysql
+        networks:
+            - mysql
+            - php
+    nginx:
+        build: ./nginx
+        ports:
+            - "80:80"
+        depends_on:
+            - php
+        networks:
+            - php
+        volumes:
+            - ./var/log/nginx:/var/log/nginx:cached
+            - .:/var/www/symfony:cached
+    keycloak:
+        image: jboss/keycloak
+        ports:
+            - "8080:8080"
+        environment:
+            DB_VENDOR: mysql
+            DB_ADDR: mysql
+            DB_PORT: 3306
+            DB_USER: root
+            DB_PASSWORD: root
+            DB_DATABASE: symfony
+            KEYCLOAK_USER: root
+            KEYCLOAK_PASSWORD: root
+            KEYCLOAK_IMPORT: '/opt/jboss/keycloak/examples-realm.json'
+        networks:
+            - mysql
+        depends_on:
+            -   mysql
+        volumes:
+            - ./realm-export.json:/opt/jboss/keycloak/examples-realm.json
+
+networks:
+    mysql:
+    php:
+
+volumes:
+    data:

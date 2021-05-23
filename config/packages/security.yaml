@@ -1,0 +1,46 @@
+security:
+    encoders:
+        App\Entity\User:
+            algorithm: bcrypt
+
+    role_hierarchy:
+        ROLE_USER:        ROLE_USER
+        ROLE_ADMIN:       ROLE_USER, ROLE_ALLOWED_TO_SWITCH
+
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            anonymous:    ~
+            light_saml_sp:
+                provider: app_user_provider
+                user_creator: App\Security\User\UserCreator
+                login_path: /saml/login
+                check_path: /saml/login_check
+                default_target_path: /
+                require_previous_session: true
+            logout:
+                path: 'lightsaml_sp.logout'
+                target: default
+                invalidate_session: false
+                success_handler: App\Services\SamlLogoutHandler
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }

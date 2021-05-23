@@ -1,0 +1,14 @@
+light_saml_symfony_bridge:
+    own:
+        entity_id: "%env(IDP_ENTITY_ID)%"
+        credentials:
+            -
+                certificate: "%kernel.root_dir%/../config/saml/saml.crt"
+                key:         "%kernel.root_dir%/../config/saml/saml.key"
+                password:    ~
+    party:
+        idp:
+            files:
+                - "%kernel.root_dir%/../%env(IDP_XML_CONFIG)%"
+    store:
+        id_state: App\Store\IdStoreInterface
